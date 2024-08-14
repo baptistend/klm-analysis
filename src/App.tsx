@@ -1,150 +1,229 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Button } from 'primereact/button';
-import {Analysis, Scenario} from './types/global';
-import { ScenarioContent } from './components/Scenario';
-const emptyScenario: Scenario = {
-  description: '',
-  analysis: []
-}
+import {  Scenario } from './types/global';
+import { Column } from 'primereact/column';
+import { InputText } from 'primereact/inputtext';
+import { DataTable } from 'primereact/datatable';
 
-const fakeScenario: Scenario = {
-  description: "User testing a new email client application to send an email with an attachment.",
-  analysis: [
-      {
-          userAction: "Open the email client",
-          detailledTask: [
-              {
-                  description: "Locate and click on the email client icon on the desktop",
-                  klm: [
-                      { operator: "K", count: 1, time: 0.2 }, // Keypress to wake up the screen
-                      { operator: "P", count: 1, time: 1.1 }, // Pointing to the icon
-                      { operator: "C", count: 1, time: 0.1 }, // Clicking the icon
-                  ],
-                  taskTime: 1.4
-              }
-          ],
-          averageTime: 1.4
-      },
-      {
-          userAction: "Compose a new email",
-          detailledTask: [
-              {
-                  description: "Click on 'New Email' button",
-                  klm: [
-                      { operator: "P", count: 1, time: 1.2 }, // Pointing to 'New Email' button
-                      { operator: "C", count: 1, time: 0.1 }, // Clicking the button
-                  ],
-                  taskTime: 1.3
-              },
-              {
-                  description: "Enter the recipient's email address",
-                  klm: [
-                      { operator: "K", count: 15, time: 3.0 }, // Typing the email address
-                  ],
-                  taskTime: 3.0
-              },
-              {
-                  description: "Type the subject of the email",
-                  klm: [
-                      { operator: "K", count: 10, time: 2.0 }, // Typing the subject
-                  ],
-                  taskTime: 2.0
-              },
-              {
-                  description: "Attach a file",
-                  klm: [
-                      { operator: "P", count: 1, time: 1.5 }, // Pointing to 'Attach' button
-                      { operator: "C", count: 1, time: 0.1 }, // Clicking the button
-                      { operator: "P", count: 1, time: 2.0 }, // Pointing to the file in the dialog
-                      { operator: "C", count: 1, time: 0.1 }, // Clicking the file to select it
-                      { operator: "K", count: 1, time: 0.5 }, // Pressing 'Enter' to attach
-                  ],
-                  taskTime: 4.2
-              },
-              {
-                  description: "Send the email",
-                  klm: [
-                      { operator: "P", count: 1, time: 1.3 }, // Pointing to 'Send' button
-                      { operator: "C", count: 1, time: 0.1 }, // Clicking 'Send'
-                  ],
-                  taskTime: 1.4
-              }
-          ],
-          averageTime: 11.9
-      }
-  ]
-};
+import { useScenario } from './scenario/useScenario';
+import { InputTextarea } from 'primereact/inputtextarea';
 
-function App()   {
-  const [building, setBuilding] = useState<boolean>(false);
-  const [scenario, setScenario ] = useState<Scenario | undefined>()
-  const handleNewScenario = () => {
-    setScenario(fakeScenario);
-    setBuilding(true);
-  }
-  const handleScenarioDescriptionChange = (description: string) => {
-    if (scenario) {
-      setScenario({
-        ...scenario,
-        description
+function App() {
+    const [scenarios, handleNewScenario, handleScenarioDescriptionChange, 
+      handleAnalysisChange, addAnalysis, dt,  addKLMAction,editScenarioDescription,
+       editUserAction, editKLMAction, addTask, handleTaskDescriptionChange] = useScenario();
+
+    useEffect(() => {}, []);
+
+    const handleSaveScenario = () => {
+        console.log('Saving scenario');
+    };
+    const detailledTaskTemplate = (data: Scenario) => {
+      return (
+          <div>
+              {data?.analysis?.map((analysisItem, analysisIndex) => (
+                  <div key={analysisIndex} className="mb-2">
+                    <p>({analysisIndex + 1})</p>
+                      {analysisItem.detailledTask.map((task, taskIndex) => (
+                          <div key={taskIndex} className="ml-4">
+                                       <p>&nbsp;&nbsp;({String.fromCharCode(97 + taskIndex)})</p>
+
+                              <InputTextarea
+                                value={task.description}
+                                onChange={(e) => handleTaskDescriptionChange(0, analysisIndex, taskIndex, e.target.value)}
+                                rows={2} 
+                                cols={30}
+                            />
+                          </div>
+                      ))}
+                      <Button  icon="pi pi-plus" onClick={() => addTask(0, analysisIndex)} />
+
+                  </div>
+              ))}
+          </div>
+      );
+  };
+  
+  // Template for detailed KLM actions
+  const detailledKLMTemplate = (data: Scenario) => {
+    
+      return (
+          <div>
+              {data?.analysis?.map((analysisItem, analysisIndex) => (
+                  <div key={analysisIndex} className="mb-2">
+                               <p>({analysisIndex + 1})</p>
+
+                      {analysisItem.detailledTask.map((task, taskIndex) => (
+                          <div key={taskIndex} className="ml-4">
+           <p>&nbsp;&nbsp;({String.fromCharCode(97 + taskIndex)})</p>
+                              <ul className="ml-4">
+                                  {task.klm.map((klmAction, klmIndex) => (
+                                      <li key={klmIndex}>
+                                          {klmAction.operator}: {klmAction.time.toFixed(2)}s
+                                      </li>
+                                  ))}
+                                  <Button  icon="pi pi-plus" onClick={() => addKLMAction(0, analysisIndex, taskIndex)} />
+                              </ul>
+                          </div>
+                      ))}
+                  </div>
+              ))}
+          </div>
+      );
+  };
+  const detailledActionTemplate = (data: Scenario) => {
+      return (
+          <div>
+              {data?.analysis?.map((analysisItem, analysisIndex) => (
+                  <div key={analysisIndex} className="mb-2">
+                            <p>({analysisIndex + 1})</p>
+                            <InputTextarea
+                                value={analysisItem.userAction}
+                                onChange={(e) => editUserAction(0, analysisIndex, e.target.value)}
+                                rows={2} 
+                                cols={30}
+                            />
+
+                  </div>
+              ))}
+                                    <Button  icon="pi pi-plus" onClick={() => addAnalysis(0)} />
+
+          </div>
+      );
+    }
+ 
+   
+
+    // Save Excel file
+    const saveAsExcelFile = (buffer: string, fileName: string) => {
+        import('file-saver').then((module) => {
+            if (module && module.default) {
+                let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+                let EXCEL_EXTENSION = '.xlsx';
+                const data = new Blob([buffer], {
+                    type: EXCEL_TYPE,
+                });
+
+                module.default.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+            }
+        });
+    };
+
+    const exportExcel = () => {
+      import('xlsx').then((xlsx) => {
+          // Define column headers in French
+          const headers = {
+              description: 'Description',
+              userAction: 'Action Utilisateur',
+              detailledTask: 'Tâches Raffinées',
+              klmActions: 'Action KLM Correspondantes',
+              averageTime: 'Temps Estimé'
+          };
+  
+          // Prepare the data with line breaks
+          const formattedData = scenarios.map(scenario => ({
+              description: scenario.description,
+              userAction: scenario.analysis.map(a => a.userAction).join('\n'),
+              detailledTask: scenario.analysis.flatMap(a => a.detailledTask.map(t => t.description)).join('\n'),
+              klmActions: scenario.analysis.flatMap(a => a.detailledTask.flatMap(t => t.klm.map(klm => `${klm.operator}: ${klm.time.toFixed(2)}s`))).join('\n'),
+              averageTime: scenario.analysis.reduce((total, a) => total + a.averageTime, 0).toFixed(2) + 's'
+          }));
+  
+          // Create the worksheet with formatted data
+          const worksheet = xlsx.utils.json_to_sheet(formattedData, { header: Object.keys(headers) });
+          Object.keys(worksheet).forEach(key => {
+            if (key !== '!ref' && key !== '!cols') { // Skip special properties
+                worksheet[key].s = {
+                    alignment: { wrapText: true } // Enable text wrapping
+                    
+                };
+            }
+        });
+          // Add column headers to the first row
+          const headerRow = Object.values(headers);
+          headerRow.forEach((header, index) => {
+              const cellAddress = xlsx.utils.encode_cell({ r: 0, c: index });
+              worksheet[cellAddress] = { v: header, t: 's' }; // Set header value
+              worksheet[cellAddress].s = { font: { bold: true }, fill: { fgColor: { rgb: 'FFFF00' } } }; // Style header
+          });
+  
+          // Create the workbook
+          const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+          const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+  
+          // Save the file
+          saveAsExcelFile(excelBuffer, 'scenarios_export');
       });
-    }
-  }
-  const handleAnalysisChange = (analysis: Analysis[]) => {
-    setScenario({
-      ...scenario!,
-      analysis: analysis
-    });
-  }
+  };
 
-  const addAnalysis = () => {
-    if (scenario) {
-      setScenario({
-        ...scenario,
-        analysis: [
-          ...scenario.analysis,
-          {
-            userAction: '',
-            detailledTask: [],
-            averageTime: 0
-          }
-        ]
-      });
-    }
-  }
-
-  const handleSaveScenario = () => {
-    console.log('Saving scenario');
-  }
-  useEffect(() => {
-    if (building) {
-      console.log('Building a new scenario');
-    }
-  }, [building]);
-
-  if (!building) {
     return (
-      <div className='flex align-items-center justify-content-between'>
-        <Button className="bg-primary" label="Créer un nouveau scénario" onClick={handleNewScenario} />
-      </div>
+        <div className="flex w-full h-screen flex-column align-items-center justify-content-between gap-5 my-5">
+            <div className="flex flex-column">
+                <div className="flex justify-content-end mb-4">
+                    <Button label="Ajouter un nouveau scénario" icon="pi pi-plus" onClick={handleNewScenario} />
+                    <Button
+                        className="ml-auto mb-3"
+                        type="button"
+                        icon="pi pi-file"
+                        rounded
+                        onClick={exportExcel}
+                        data-pr-tooltip="XLS"
+                    />
+                </div>
+
+                <div className="card">
+                    <DataTable
+                        ref={dt}
+                        value={scenarios}
+                        removableSort
+                        paginator
+                        rows={10}
+                        stripedRows
+                        showGridlines
+                        tableStyle={{ minWidth: '60rem' }}
+                        filterDisplay="row"
+                        emptyMessage={<p>Pas de tâches pour ce scénario</p>}
+                    >
+                        <Column
+                            key="Description"
+                            field="description"
+                            header="Description"
+                            sortable
+                            editor={(props) => (
+                                <InputText
+                                    value={props.rowData.description}
+                                    onChange={(e) => handleScenarioDescriptionChange(e.target.value, props.rowIndex)}
+                                />
+                            )}
+                        ></Column>
+                        <Column
+                            key="Action utilisateur"
+                            field="userAction"
+                            sortable
+                            body={detailledActionTemplate}
+
+                            header="Action utilisateur"
+                        ></Column>
+                        <Column
+                            key="Tâches raffinées"
+                            field="detailledTask"
+                            body={detailledTaskTemplate}
+                            sortable
+                            header="Tâches raffinées"
+                        ></Column>
+                        <Column
+                            key="Action KLM correspondantes"
+                            field="detailledTask"
+                            body={detailledKLMTemplate}
+                            sortable
+                            header="Action KLM correspondantes"
+                        ></Column>
+                        <Column key="Temps estimé" field="time" header="Temps estimé (s)" sortable ></Column>
+                    </DataTable>
+                </div>
+            </div>
+        </div>
     );
-  }
-  else{
-    return (
-      <div className='flex w-full h-screen flex-column align-items-center justify-content-between gap-5 my-5'>
-      <div className='flex flex-row gap-4 justify-content-center mt-5'>
-          <Button className="bg-primary" label="Annuler le scénario" onClick={() => setBuilding(false)} />
-          <Button className="bg-primary" label="Enregistrer le scénario" onClick={handleSaveScenario} />
-      </div>
-
-          <ScenarioContent scenario={scenario!} 
-          handleScenarioDescriptionChange={handleScenarioDescriptionChange}
-          handleAnalysisChange={handleAnalysisChange} 
-          addAnalysis={addAnalysis}
-          />
-        </div>  );
-  }
-
 }
 
 export default App;
