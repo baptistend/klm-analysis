@@ -18,104 +18,121 @@ function App() {
 
     const detailledTaskTemplate = (data: Scenario, options:ColumnBodyOptions) => {
       return (
-        <div key={options.rowIndex} className="flex flex-column  align-items-center justify-content-center">
-              {data?.analysis?.map((analysisItem, analysisIndex) => (
-                  <div key={analysisIndex} className="flex flex-column  align-items-center justify-content-center mb-2">
-                    <p>({analysisIndex + 1})</p>
-                      {analysisItem.detailledTask.map((task, taskIndex) => (
-                          <div key={taskIndex} className="ml-4">
-                                       <p>&nbsp;&nbsp;({String.fromCharCode(97 + taskIndex)})</p>
-                            <div  className="field grid gap-2">
-                            <Button  className="my-1 align-items-center" icon="pi pi-minus" onClick={() => deleteTask(options.rowIndex, analysisIndex, taskIndex)} />
-                            <InputTextarea
-                              autoResize
-                                value={task.description}
-                                onChange={(e) => handleTaskDescriptionChange(options.rowIndex, analysisIndex, taskIndex, e.target.value)}
-                                rows={2} 
-                                cols={30}
-                            />
-                                </div>
-                 
-                          </div>
-                      ))}
-                      <Button  className="mt-3 align-items-center" icon="pi pi-plus" onClick={() => addTask(options.rowIndex, analysisIndex)} />
+        <div key={`task${options.rowIndex}`} className="flex flex-column  align-items-center justify-content-center">
+    {data?.analysis?.map((analysisItem, analysisIndex) => (
+        <div key={`analysis-${options.rowIndex}-${analysisIndex}`} className="flex flex-column  align-items-center justify-content-center mb-2">
+            <p>({analysisIndex + 1})</p>
+            {analysisItem.detailledTask.map((task, taskIndex) => (
+                <div key={`task-${options.rowIndex}-${analysisIndex}-${taskIndex}`} className="ml-4">
+                    <p>&nbsp;&nbsp;({String.fromCharCode(97 + taskIndex)})</p>
+                    <div className="field grid gap-2">
+                        <Button className="my-1 align-items-center" icon="pi pi-minus" onClick={() => deleteTask(options.rowIndex, analysisIndex, taskIndex)} />
+                        <InputTextarea
+                            autoResize
+                            value={task.description}
+                            onChange={(e) => handleTaskDescriptionChange(options.rowIndex, analysisIndex, taskIndex, e.target.value)}
+                            rows={2}
+                            cols={30}
+                        />
+                    </div>
+                </div>
+            ))}
+            <Button className="mt-3 align-items-center" icon="pi pi-plus" onClick={() => addTask(options.rowIndex, analysisIndex)} />
+        </div>
+    ))}
+</div>
 
-                  </div>
-              ))}
-          </div>
       );
   };
   
-  // Template for detailed KLM actions
-  const detailledKLMTemplate = (data: Scenario, options:ColumnBodyOptions) => {
-    
-      return (
-        <div key={options.rowIndex} className="flex flex-column  align-items-center justify-content-center">
-              {data?.analysis?.map((analysisItem, analysisIndex) => (
-                  <div key={analysisIndex} className="mb-2">
-                               <p>({analysisIndex + 1})</p>
+  const detailledKLMTemplate = (data: Scenario, options: ColumnBodyOptions) => {
+    return (
+        <div className="flex flex-column align-items-center justify-content-center">
+            {data?.analysis?.map((analysisItem, analysisIndex) => (
+                <div key={analysisIndex} className="mb-2">
+                    <p>({analysisIndex + 1})</p>
 
-                      {analysisItem.detailledTask.map((task, taskIndex) => (
-                          <div key={taskIndex} className="ml-4">
-           <p>&nbsp;&nbsp;({String.fromCharCode(97 + taskIndex)})</p>
-                              <ul className="flex flex-column  align-items-center justify-content-center ml-4">
-                                  {task.klm.map((klmAction, klmIndex) => (
-                                    <div className="field grid gap-3">
-                            <Button  className=" my-1 align-items-center" icon="pi pi-minus" onClick={() => deleteKLMAction(options.rowIndex, analysisIndex, taskIndex, klmIndex)} />
-                            <TaskContent  key={klmIndex} klm={klmAction}         setKLM={(updatedKLM) =>
-                                        updateKLM(options.rowIndex, analysisIndex, taskIndex, klmIndex, updatedKLM)
-                                    } />
+                    {analysisItem.detailledTask.map((task, taskIndex) => (
+                        <div key={taskIndex} className="ml-4">
+                            <p>&nbsp;&nbsp;({String.fromCharCode(97 + taskIndex)})</p>
+                            <ul className="flex flex-column align-items-center justify-content-center ml-4">
+                                {task.klm.map((klmAction, klmIndex) => (
+                                    <div key={klmIndex} className="field grid gap-3">
+                                        <Button
+                                            className="my-1 align-items-center"
+                                            icon="pi pi-minus"
+                                            onClick={() => deleteKLMAction(options.rowIndex, analysisIndex, taskIndex, klmIndex)}
+                                        />
+                                        <TaskContent
+                                            klm={klmAction}
+                                            setKLM={(updatedKLM) =>
+                                                updateKLM(options.rowIndex, analysisIndex, taskIndex, klmIndex, updatedKLM)
+                                            }
+                                        />
                                     </div>
-                                    
-                                  ))}
-                                  <Button className="mt-3 align-items-center" icon="pi pi-plus" onClick={() => addKLMAction(options.rowIndex, analysisIndex, taskIndex)} />
-                              </ul>
-                          </div>
-                      ))}
-                  </div>
-              ))}
-          </div>
-      );
-  };
-  const detailledActionTemplate = (data: Scenario, options:ColumnBodyOptions) => {
-      return (
-          <div key={options.rowIndex} className="flex flex-column  align-items-center justify-content-center">
-              {data?.analysis?.map((analysisItem, analysisIndex) => (
-                  <div key={analysisIndex} className="mb-2 ">
-                            <p>({analysisIndex + 1})</p>
-                            <div className="field grid gap-2">
-                            <Button  className=" my-1 align-items-center" icon="pi pi-minus" onClick={() => deleteAnalysis(options.rowIndex, analysisIndex)} />
+                                ))}
+                                <Button
+                                    className="mt-3 align-items-center"
+                                    icon="pi pi-plus"
+                                    onClick={() => addKLMAction(options.rowIndex, analysisIndex, taskIndex)}
+                                />
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+            ))}
+        </div>
+    );
+};
 
-                            <InputTextarea
-                             autoResize
-                                value={analysisItem.userAction}
-                                onChange={(e) => editUserAction(options.rowIndex, analysisIndex, e.target.value)}
-                                rows={2} 
-                                cols={30}
-                            />
-                            </div>
+const detailledActionTemplate = (data: Scenario, options: ColumnBodyOptions) => {
+    return (
+        <div className="flex flex-column align-items-center justify-content-center">
+            {data?.analysis?.map((analysisItem, analysisIndex) => (
+                <div key={analysisIndex} className="mb-2">
+                    <p>({analysisIndex + 1})</p>
+                    <div className="field grid gap-2">
+                        <Button
+                            className="my-1 align-items-center"
+                            icon="pi pi-minus"
+                            onClick={() => deleteAnalysis(options.rowIndex, analysisIndex)}
+                        />
+                        <InputTextarea
+                            autoResize
+                            value={analysisItem.userAction}
+                            onChange={(e) => editUserAction(options.rowIndex, analysisIndex, e.target.value)}
+                            rows={2}
+                            cols={30}
+                        />
+                    </div>
+                </div>
+            ))}
+            <Button
+                className="mt-3 align-items-center"
+                icon="pi pi-plus"
+                onClick={() => addAnalysis(options.rowIndex)}
+            />
+        </div>
+    );
+};
 
-                  </div>
-              ))}
-                <Button className='mt-3 align-items-center' icon="pi pi-plus" onClick={() => addAnalysis(options.rowIndex)} />
-
-          </div>
-      );
-    }
-
-    const scenarioDescriptionTemplate = (data: Scenario, options:ColumnBodyOptions) => {
-        return (
-            <div key={options.rowIndex} className='field grid gap-2'>
-            <Button  className="my-1 align-items-center" icon="pi pi-minus" onClick={() => deleteScenario(options.rowIndex)} />
-        <InputTextarea
+const scenarioDescriptionTemplate = (data: Scenario, options: ColumnBodyOptions) => {
+    return (
+        <div className="field grid gap-2">
+            <Button
+                className="my-1 align-items-center"
+                icon="pi pi-minus"
+                onClick={() => deleteScenario(options.rowIndex)}
+            />
+            <InputTextarea
                 autoResize
                 value={data.description}
                 onChange={(e) => editScenarioDescription(options.rowIndex, e.target.value)}
             />
-            </div>
-    
-        );
-    }
+        </div>
+    );
+};
+
 
  
    
