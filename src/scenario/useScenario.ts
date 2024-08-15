@@ -69,13 +69,14 @@ const fakeScenario: Scenario = {
         time: 10.3
     };
     
-    const emptyScenario: Scenario = {
-        description: '',
-        analysis: [],
-        time: 0
-      };
+
 
       export const useScenario = () => {
+        const emptyScenario: Scenario = {
+            description: '',
+            analysis: [],
+            time: 0
+          };
         const dt = useRef<DataTable<any>>(null);
         const [scenarios, setScenarios] = useState<Scenario[]>([fakeScenario]);
     
@@ -106,6 +107,7 @@ const fakeScenario: Scenario = {
         // Handle scenario description change
         const editScenarioDescription = ( index: number, description: string) => {
             console.log("scenarios :", scenarios)
+            
             setScenarios(prev =>
                 prev.map((scenario, i) => 
                     i === index ? { ...scenario, description:description } : scenario

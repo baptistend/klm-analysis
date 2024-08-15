@@ -86,12 +86,16 @@ function App() {
 };
 
 const detailledActionTemplate = (data: Scenario, options: ColumnBodyOptions) => {
+    const addAction = () => {
+        addAnalysis(options.rowIndex)
+    }
     return (
         <div className="flex flex-column align-items-center justify-content-center">
             {data?.analysis?.map((analysisItem, analysisIndex) => (
                 <div key={analysisIndex} className="mb-2">
                     <p>({analysisIndex + 1})</p>
                     <div className="field grid gap-2">
+                        
                         <Button
                             className="my-1 align-items-center"
                             icon="pi pi-minus"
@@ -110,7 +114,7 @@ const detailledActionTemplate = (data: Scenario, options: ColumnBodyOptions) => 
             <Button
                 className="mt-3 align-items-center"
                 icon="pi pi-plus"
-                onClick={() => addAnalysis(options.rowIndex)}
+                onClick={addAction}
             />
         </div>
     );
