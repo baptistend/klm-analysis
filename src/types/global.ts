@@ -10,7 +10,10 @@ export const KLMvalues = [
 
 export interface KLM {
     operator:string,
-    time:number
+    count?:number,
+    time?:number,
+    n?:number,
+    l?:number
 }
 
 export interface Task {

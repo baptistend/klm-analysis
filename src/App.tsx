@@ -7,13 +7,14 @@ import { DataTable } from 'primereact/datatable';
 
 import { useScenario } from './scenario/useScenario';
 import { InputTextarea } from 'primereact/inputtextarea';
+import { TaskContent } from './components/Task';
 
 function App() {
     const [scenarios, handleNewScenario, handleScenarioDescriptionChange, 
       handleAnalysisChange, addAnalysis, dt,  addKLMAction,editScenarioDescription,
-       editUserAction, editKLMAction, addTask, handleTaskDescriptionChange] = useScenario();
+       editUserAction, updateKLM, addTask, handleTaskDescriptionChange] = useScenario();
 
-    useEffect(() => {}, []);
+    useEffect(() => {}, [scenarios]);
 
     const handleSaveScenario = () => {
         console.log('Saving scenario');
@@ -58,9 +59,9 @@ function App() {
            <p>&nbsp;&nbsp;({String.fromCharCode(97 + taskIndex)})</p>
                               <ul className="ml-4">
                                   {task.klm.map((klmAction, klmIndex) => (
-                                      <li key={klmIndex}>
-                                          {klmAction.operator}: {klmAction.time.toFixed(2)}s
-                                      </li>
+                                      <TaskContent key={klmIndex} klm={klmAction}         setKLM={(updatedKLM) =>
+                                        updateKLM(0, analysisIndex, taskIndex, klmIndex, updatedKLM)
+                                    } />
                                   ))}
                                   <Button  icon="pi pi-plus" onClick={() => addKLMAction(0, analysisIndex, taskIndex)} />
                               </ul>
@@ -125,7 +126,7 @@ function App() {
               description: scenario.description,
               userAction: scenario.analysis.map(a => a.userAction).join('\n'),
               detailledTask: scenario.analysis.flatMap(a => a.detailledTask.map(t => t.description)).join('\n'),
-              klmActions: scenario.analysis.flatMap(a => a.detailledTask.flatMap(t => t.klm.map(klm => `${klm.operator}: ${klm.time.toFixed(2)}s`))).join('\n'),
+              klmActions: scenario.analysis.flatMap(a => a.detailledTask.flatMap(t => t.klm.map(klm => `${klm.operator}: ${klm.time?.toFixed(2)}s`))).join('\n'),
               averageTime: scenario.analysis.reduce((total, a) => total + a.averageTime, 0).toFixed(2) + 's'
           }));
   
