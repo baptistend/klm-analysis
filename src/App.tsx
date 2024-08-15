@@ -8,7 +8,7 @@ import { DataTable } from 'primereact/datatable';
 import { useScenario } from './scenario/useScenario';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { TaskContent } from './components/Task';
-
+import 'primeflex/primeflex.css';
 function App() {
     const [scenarios, handleNewScenario, handleScenarioDescriptionChange, 
       handleAnalysisChange, addAnalysis, dt,  addKLMAction,editScenarioDescription,
@@ -21,9 +21,9 @@ function App() {
     };
     const detailledTaskTemplate = (data: Scenario) => {
       return (
-          <div>
+        <div className="flex flex-column  align-items-center justify-content-center">
               {data?.analysis?.map((analysisItem, analysisIndex) => (
-                  <div key={analysisIndex} className="mb-2">
+                  <div key={analysisIndex} className="flex flex-column  align-items-center justify-content-center mb-2">
                     <p>({analysisIndex + 1})</p>
                       {analysisItem.detailledTask.map((task, taskIndex) => (
                           <div key={taskIndex} className="ml-4">
@@ -37,7 +37,7 @@ function App() {
                             />
                           </div>
                       ))}
-                      <Button  icon="pi pi-plus" onClick={() => addTask(0, analysisIndex)} />
+                      <Button  className="mt-3 align-items-center" icon="pi pi-plus" onClick={() => addTask(0, analysisIndex)} />
 
                   </div>
               ))}
@@ -49,7 +49,7 @@ function App() {
   const detailledKLMTemplate = (data: Scenario) => {
     
       return (
-          <div>
+        <div className="flex flex-column  align-items-center justify-content-center">
               {data?.analysis?.map((analysisItem, analysisIndex) => (
                   <div key={analysisIndex} className="mb-2">
                                <p>({analysisIndex + 1})</p>
@@ -57,13 +57,13 @@ function App() {
                       {analysisItem.detailledTask.map((task, taskIndex) => (
                           <div key={taskIndex} className="ml-4">
            <p>&nbsp;&nbsp;({String.fromCharCode(97 + taskIndex)})</p>
-                              <ul className="ml-4">
+                              <ul className="flex flex-column  align-items-center justify-content-center ml-4">
                                   {task.klm.map((klmAction, klmIndex) => (
                                       <TaskContent key={klmIndex} klm={klmAction}         setKLM={(updatedKLM) =>
                                         updateKLM(0, analysisIndex, taskIndex, klmIndex, updatedKLM)
                                     } />
                                   ))}
-                                  <Button  icon="pi pi-plus" onClick={() => addKLMAction(0, analysisIndex, taskIndex)} />
+                                  <Button className="mt-3 align-items-center" icon="pi pi-plus" onClick={() => addKLMAction(0, analysisIndex, taskIndex)} />
                               </ul>
                           </div>
                       ))}
@@ -74,9 +74,9 @@ function App() {
   };
   const detailledActionTemplate = (data: Scenario) => {
       return (
-          <div>
+          <div className="flex flex-column  align-items-center justify-content-center">
               {data?.analysis?.map((analysisItem, analysisIndex) => (
-                  <div key={analysisIndex} className="mb-2">
+                  <div key={analysisIndex} className="mb-2 ">
                             <p>({analysisIndex + 1})</p>
                             <InputTextarea
                                 value={analysisItem.userAction}
@@ -87,7 +87,7 @@ function App() {
 
                   </div>
               ))}
-                                    <Button  icon="pi pi-plus" onClick={() => addAnalysis(0)} />
+                <Button className='mt-3 align-items-center' icon="pi pi-plus" onClick={() => addAnalysis(0)} />
 
           </div>
       );
@@ -158,12 +158,12 @@ function App() {
   };
 
     return (
-        <div className="flex w-full h-screen flex-column align-items-center justify-content-between gap-5 my-5">
+        <div className="flex w-full h-screen flex-column align-items-center justify-content-between m-3 gap-5 ">
             <div className="flex flex-column">
-                <div className="flex justify-content-end mb-4">
-                    <Button label="Ajouter un nouveau scénario" icon="pi pi-plus" onClick={handleNewScenario} />
+                <div className="flex justify-content-between gap-3 my-4">
+                    <Button className=" ml-5 mx-3 "label="Ajouter un nouveau scénario" icon="pi pi-plus" onClick={handleNewScenario} />
                     <Button
-                        className="ml-auto mb-3"
+                        className="mr-3 align-items-centers  "
                         type="button"
                         icon="pi pi-file"
                         rounded
@@ -181,6 +181,7 @@ function App() {
                         rows={10}
                         stripedRows
                         showGridlines
+                        className='w-auto'
                         tableStyle={{ minWidth: '60rem' }}
                         filterDisplay="row"
                         emptyMessage={<p>Pas de tâches pour ce scénario</p>}
@@ -190,8 +191,10 @@ function App() {
                             field="description"
                             header="Description"
                             sortable
+                            className='w-1'
                             editor={(props) => (
-                                <InputText
+                                <InputTextarea
+                                cols={5}
                                     value={props.rowData.description}
                                     onChange={(e) => handleScenarioDescriptionChange(e.target.value, props.rowIndex)}
                                 />
@@ -219,7 +222,7 @@ function App() {
                             sortable
                             header="Action KLM correspondantes"
                         ></Column>
-                        <Column key="Temps estimé" field="time" header="Temps estimé (s)" sortable ></Column>
+                        <Column className="w-1" key="Temps estimé" field="time" header="Temps estimé (s)" sortable ></Column>
                     </DataTable>
                 </div>
             </div>

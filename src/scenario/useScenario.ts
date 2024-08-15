@@ -305,11 +305,17 @@ const calculateAnalysisTime = () => {
 
 const calculateScenarioTime = () => {
     setScenarios(prevScenarios => {
-        const test = scenarios[0].analysis.reduce((total, analysisItem) => total + (analysisItem.averageTime || 0), 0);
-        return prevScenarios.map(scenario => ({
-            ...scenario,
-            time: scenario.analysis.reduce((total, analysisItem) => total + (analysisItem.averageTime || 0), 0)
-        }));
+        return prevScenarios.map(scenario => {
+            // Calculate total time
+            const totalTime = scenario.analysis.reduce((total, analysisItem) => 
+                total + (analysisItem.averageTime || 0), 0);
+            
+            // Return the updated scenario with formatted time
+            return {
+                ...scenario,
+                time: Math.round(totalTime * 100) / 100 // Format total time to 2 decimal places
+            };
+        });
     });
 };
 

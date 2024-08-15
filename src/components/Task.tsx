@@ -10,12 +10,12 @@ interface TaskProps {
 }
 
 export const TaskContent: React.FC<TaskProps> = ({ klm, setKLM }) => {
-    const [operator, setOperator] = useState<string>(klm.operator);
 
 
     const handleOperatorChange = (e: any) => {
-        const updatedKLM = { ...klm, operator: e.label }; // Create a new KLM object with the updated `count`
-
+        console.log("e", e)
+        const updatedKLM = { ...klm, operator: e.value }; // Create a new KLM object with the updated `count`
+        console.log(updatedKLM)
         setKLM(updatedKLM);
     };
 
@@ -36,18 +36,18 @@ export const TaskContent: React.FC<TaskProps> = ({ klm, setKLM }) => {
     };
 
     useEffect(() => {
-    }, [operator])
+    }, [klm])
 
     return (
         <div className="flex align-items-center gap-2">
             <Dropdown
             size={1}
-                value={operator}
+                value={klm.operator}
                 options={KLMvalues.map(k => ({ label: k.label, value: k.label }))}
                 onChange={handleOperatorChange}
             />
 
-            {operator === "D" ? (
+            {klm.operator === "D" ? (
                 <>
                     <InputNumber size={1} value={klm.n} onChange={(e) => handleNChange(e.value as number)} placeholder="n" />
                     <InputNumber size={1} value={klm.l} onChange={(e) => handleLChange(e.value as number)} placeholder="l" />
