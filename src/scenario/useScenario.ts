@@ -81,26 +81,39 @@ const fakeScenario: Scenario = {
     
         // Handle adding a new scenario
         const handleNewScenario = () => {
-            setScenarios(prev => [...prev, { ...emptyScenario }]);
+
+            setScenarios(prev => {
+                const updatedScenarios = [...prev];
+                updatedScenarios.push({ ...emptyScenario });
+            console.log("scenarios :", updatedScenarios)
+
+                return updatedScenarios;
+            })
+                
+            //go to last page 
         };
+
+        const deleteScenario = (index: number) => {
+            setScenarios(prev => {
+                const updatedScenarios = [...prev];
+                updatedScenarios.splice(index, 1);
+                return updatedScenarios;
+            });
+            recalculateEverything()
+        }
+
     
         // Handle scenario description change
-        const handleScenarioDescriptionChange = (description: string, index: number) => {
-            setScenarios(prev => 
+        const editScenarioDescription = ( index: number, description: string) => {
+            console.log("scenarios :", scenarios)
+            setScenarios(prev =>
                 prev.map((scenario, i) => 
-                    i === index ? { ...scenario, description } : scenario
+                    i === index ? { ...scenario, description:description } : scenario
                 )
             );
         };
     
-        // Handle analysis change for a specific scenario
-        const handleAnalysisChange = (analysis: Analysis[], index: number) => {
-            setScenarios(prev => 
-                prev.map((scenario, i) => 
-                    i === index ? { ...scenario, analysis } : scenario
-                )
-            );
-        };
+
         const addTask = (scenarioIndex: number, analysisIndex: number) => {
             setScenarios(prev => {
                 const updatedScenarios = [...prev];
@@ -118,26 +131,43 @@ const fakeScenario: Scenario = {
             });
             recalculateEverything()
         }
+
+        const deleteTask = (scenarioIndex: number, analysisIndex: number, taskIndex: number) => {
+            setScenarios(prev => {
+                const updatedScenarios = [...prev];
+                updatedScenarios[scenarioIndex].analysis[analysisIndex].detailledTask.splice(taskIndex, 1);
+                return updatedScenarios;
+            });
+            recalculateEverything()
+        }
         // Add a new analysis to a specific scenario
         const addAnalysis = (index: number) => {
-            setScenarios(prev => 
-                prev.map((scenario, i) => 
-                    i === index 
-                        ? { 
-                            ...scenario, 
-                            analysis: [
-                                ...scenario.analysis,
-                                {
-                                    userAction: '',
-                                    detailledTask: [],
-                                    averageTime: 0
-                                }
-                            ] 
-                        }
-                        : scenario
-                )
+            setScenarios(prev => {
+                const updatedScenarios = [...prev];
+                console.log("add : ", updatedScenarios)
+                const prevAnalysis = updatedScenarios[index].analysis;
+                prevAnalysis.push({
+                    userAction: '',
+                    detailledTask: [],
+                    averageTime: 0
+                });
+                updatedScenarios[index].analysis = prevAnalysis;
+                return updatedScenarios;
+      
+            }
+
+
+               
             );
         };
+        const deleteAnalysis = (scenarioIndex: number, analysisIndex: number) => {
+            setScenarios(prev => {
+                const updatedScenarios = [...prev];
+                updatedScenarios[scenarioIndex].analysis.splice(analysisIndex, 1);
+                return updatedScenarios;
+            });
+            recalculateEverything()
+        }
     
 
         const addKLMAction = (
@@ -172,7 +202,27 @@ const fakeScenario: Scenario = {
             recalculateEverything()
 
           };
+          const deleteKLMAction = ( scenarioIndex: number, analysisIndex: number, taskIndex: number, klmIndex: number) => {
+            setScenarios((prev) => {
+              const updatedScenarios = [...prev];
           
+              // Access the specific scenario, analysis, and task
+              const scenario = updatedScenarios[scenarioIndex];
+              const analysisItem = scenario.analysis[analysisIndex];
+              const task = analysisItem.detailledTask[taskIndex];
+          
+              // Remove the KLM action at the specified index
+              task.klm.splice(klmIndex, 1);
+          
+              // Recalculate task time by summing up all KLM actions' times
+              task.taskTime = task.klm.reduce((total, klm) => total + (klm.time || 0), 0);
+          
+              // Return the updated scenarios array to update the state
+              return updatedScenarios;
+            });
+            recalculateEverything()
+
+          }
     const updateKLM = (
         scenarioIndex: number,
         analysisIndex: number,
@@ -207,28 +257,16 @@ const fakeScenario: Scenario = {
     // Edit user action
     const editUserAction = (scenarioIndex: number, userActionIndex: number, updatedUserAction: string) => {
         setScenarios(prev => {
-            const updatedScenarios = [...prev]; // Create a copy of the scenarios array
-            const scenario = updatedScenarios[scenarioIndex]; // Get the specific scenario
-            const analysisItem = scenario.analysis[userActionIndex]; // Get the specific analysis item
-            
-            // Update the userAction for the specific analysis item
-            analysisItem.userAction = updatedUserAction;
-            
-            return updatedScenarios; // Return the updated scenarios array
-        });
+            const updatedScenarios = [...prev];
+            updatedScenarios[scenarioIndex].analysis[userActionIndex].userAction = updatedUserAction;
+            return updatedScenarios;
+        }); 
     };
     
 
-    // Edit scenario description
-    const editScenarioDescription = (scenarioIndex: number, newDescription: string) => {
-        setScenarios(prev => {
-            const updatedScenarios = [...prev];
-            updatedScenarios[scenarioIndex].description = newDescription;
-            return updatedScenarios;
-        });
-    };
+
     const handleTaskDescriptionChange = (scenarioIndex: number, analysisIndex: number, taskIndex: number, newDescription: string) => {
-        const updatedScenarios = [...scenarios];
+        const updatedScenarios = [...scenarios];    
         updatedScenarios[scenarioIndex].analysis[analysisIndex].detailledTask[taskIndex].description = newDescription;
         setScenarios(updatedScenarios);
     };
@@ -326,6 +364,7 @@ const calculateScenarioTime = () => {
             recalculateEverything()
 
         }, []);
-        return [scenarios, handleNewScenario, handleScenarioDescriptionChange, handleAnalysisChange, addAnalysis, 
-            dt, addKLMAction,editScenarioDescription, editUserAction, updateKLM, addTask, handleTaskDescriptionChange] as const;
+        return [scenarios, handleNewScenario, addAnalysis, 
+            dt, addKLMAction,editScenarioDescription, editUserAction, updateKLM,
+             addTask, handleTaskDescriptionChange, deleteScenario,deleteAnalysis,deleteTask, deleteKLMAction  ] as const;
     };
