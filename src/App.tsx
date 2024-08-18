@@ -10,6 +10,7 @@ import { TaskContent } from './components/Task';
 import 'primeflex/primeflex.css';
 import { InputSwitch } from 'primereact/inputswitch';
 import { About } from './components/About';
+import { Tooltip } from 'primereact/tooltip';
 function App() {
     const [scenarios, handleNewScenario, addAnalysis, dt,  addKLMAction,editScenarioDescription,
        editUserAction, updateKLM, addTask, handleTaskDescriptionChange, deleteScenario,deleteAnalysis,deleteTask, deleteKLMAction ] = useScenario();
@@ -361,12 +362,15 @@ const scenarioDescriptionTemplate = (data: Scenario, options: ColumnBodyOptions)
                    <Button
                         className="mr-3 align-items-centers  "
                         type="button"
+                        severity="info"
                         icon="pi pi-file"
                         rounded
                         onClick={exportExcel}
+                        tooltip="Export Excel"
                         data-pr-tooltip="XLS"
                     />
-                    <Button type="button" severity="warning" icon="pi pi-file" rounded onClick={exportCSV} data-pr-tooltip="CSV" />
+                    <Button type="button" severity="success" icon="pi pi-file" rounded onClick={exportCSV}  tooltip="Export CSV"
+ data-pr-tooltip="CSV" />
                    </div>
 
                 </div>
