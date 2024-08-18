@@ -1,7 +1,7 @@
 export const KLMvalues = [
     { 
         label: "K", 
-        value: 0.2, 
+        value: 0.28, 
         description: "Appui sur une touche ou un bouton" // Keystroke or button press
     },
     { 
@@ -16,7 +16,7 @@ export const KLMvalues = [
     },
     { 
         label: "M", 
-        value: 1.2, 
+        value: 1.35, 
         description: "Préparation mentale" // Mental preparation
     },
     { 
@@ -38,6 +38,7 @@ export interface KLM {
     operator:string,
     count?:number,
     time?:number,
+    r?:number,
     n?:number,
     l?:number
 }

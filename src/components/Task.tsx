@@ -13,7 +13,6 @@ export const TaskContent: React.FC<TaskProps> = ({ klm, setKLM }) => {
 
 
     const handleOperatorChange = (e: any) => {
-        console.log("e", e)
         const updatedKLM = { ...klm, operator: e.value }; // Create a new KLM object with the updated `count`
         console.log(updatedKLM)
         setKLM(updatedKLM);
@@ -29,7 +28,10 @@ export const TaskContent: React.FC<TaskProps> = ({ klm, setKLM }) => {
         setKLM(updatedKLM); // Set the updated KLM object
     };
     
-
+    const handleRChange = (value: number) => {
+        const updatedKLM = { ...klm, r: value }; // Create a new KLM object with the updated `r`
+        setKLM(updatedKLM); // Set the updated KLM object
+    }
     const handleLChange = (value: number) => {
         const updatedKLM = { ...klm, l: value }; // Create a new KLM object with the updated `l`
         setKLM(updatedKLM);
@@ -52,9 +54,16 @@ export const TaskContent: React.FC<TaskProps> = ({ klm, setKLM }) => {
                     <InputNumber size={1} value={klm.n} onChange={(e) => handleNChange(e.value as number)} placeholder="n" />
                     <InputNumber size={1} value={klm.l} onChange={(e) => handleLChange(e.value as number)} placeholder="l" />
                 </>
-            ) : (
-                <InputNumber size={1} mode="decimal" showButtons value={klm.count} onChange={(e) => handleCountChange(e.value as number)} />
-            )}
+            ) : <>
+            {klm.operator === "R" ?                     
+                 <InputNumber size={1} value={klm.r} onChange={(e) => handleRChange(e.value as number)} maxFractionDigits={2} placeholder="r" />
+                 :
+           
+                <InputNumber size={1} mode="decimal" showButtons value={klm.count} onChange={(e) => handleCountChange(e.value as number)} />}
+            </>
+            
+            }
+            
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { DataTable, DataTableRowEditCompleteEvent } from "primereact/datatable";
+import { DataTable } from "primereact/datatable";
 import { Analysis, KLM, KLMvalues, Scenario } from "../types/global";
 import { useEffect, useRef, useState } from "react";
 
@@ -72,26 +72,27 @@ const fakeScenario: Scenario = {
 
 
       export const useScenario = () => {
-        const emptyScenario: Scenario = {
-            description: '',
-            analysis: [],
+        const emptyScenario = {
+            description: "",
+            analysis: [],   
             time: 0
-          };
+        }
+        const emptyAnalysis ={
+            userAction: "", 
+            detailledTask: [],
+            averageTime: 0
+        };
         const dt = useRef<DataTable<any>>(null);
         const [scenarios, setScenarios] = useState<Scenario[]>([fakeScenario]);
     
-        // Handle adding a new scenario
         const handleNewScenario = () => {
-
             setScenarios(prev => {
-                const updatedScenarios = [...prev];
-                updatedScenarios.push({ ...emptyScenario });
-            console.log("scenarios :", updatedScenarios)
-
+                // Create a new array with the new scenario added at the beginning
+                const updatedScenarios = [emptyScenario, ...prev];
                 return updatedScenarios;
-            })
-                
-            //go to last page 
+            });
+        
+            // go to the first page
         };
 
         const deleteScenario = (index: number) => {
@@ -106,10 +107,8 @@ const fakeScenario: Scenario = {
     
         // Handle scenario description change
         const editScenarioDescription = ( index: number, description: string) => {
-            console.log("scenarios :", scenarios)
-            
             setScenarios(prev =>
-                prev.map((scenario, i) => 
+            prev.map((scenario, i) => 
                     i === index ? { ...scenario, description:description } : scenario
                 )
             );
@@ -118,21 +117,46 @@ const fakeScenario: Scenario = {
 
         const addTask = (scenarioIndex: number, analysisIndex: number) => {
             setScenarios(prev => {
-                const updatedScenarios = [...prev];
-                const scenario = updatedScenarios[scenarioIndex];
-                const analysisItem = scenario.analysis[analysisIndex];
-                analysisItem.detailledTask = [
-                    ...analysisItem.detailledTask,
-                    {
-                        description: '',
-                        klm: [],
-                        taskTime: 0
+                // Create a new array for scenarios
+                const updatedScenarios = prev.map((scenario, sIndex) => {
+                    if (sIndex === scenarioIndex) {
+                        // Create a new array for analysis
+                        const updatedAnalysis = scenario.analysis.map((analysis, aIndex) => {
+                            if (aIndex === analysisIndex) {
+                                // Create a new array for detailledTask with the new task added
+                                const updatedDetailledTask = [
+                                    ...analysis.detailledTask,
+                                    {
+                                        description: '',
+                                        klm: [],
+                                        taskTime: 0
+                                    }
+                                ];
+                                // Return the updated analysis item
+                                return {
+                                    ...analysis,
+                                    detailledTask: updatedDetailledTask
+                                };
+                            }
+                            // Return the unchanged analysis item
+                            return analysis;
+                        });
+                        // Return the updated scenario with the new analysis array
+                        return {
+                            ...scenario,
+                            analysis: updatedAnalysis
+                        };
                     }
-                ];
+                    // Return the unchanged scenario
+                    return scenario;
+                });
                 return updatedScenarios;
             });
-            recalculateEverything()
-        }
+        
+            // Call recalculateEverything after updating the state
+            recalculateEverything();
+        };
+        
 
         const deleteTask = (scenarioIndex: number, analysisIndex: number, taskIndex: number) => {
             setScenarios(prev => {
@@ -145,23 +169,24 @@ const fakeScenario: Scenario = {
         // Add a new analysis to a specific scenario
         const addAnalysis = (index: number) => {
             setScenarios(prev => {
-                const updatedScenarios = [...prev];
-                console.log("add : ", updatedScenarios)
-                const prevAnalysis = updatedScenarios[index].analysis;
-                prevAnalysis.push({
-                    userAction: '',
-                    detailledTask: [],
-                    averageTime: 0
+                // Create a new array for scenarios
+                const updatedScenarios = prev.map((scenario, sIndex) => {
+                    if (sIndex === index) {
+                        // Create a new array for analysis and add the new emptyAnalysis
+                        const updatedAnalysis = [...scenario.analysis, emptyAnalysis];
+                        // Return the updated scenario with the new analysis array
+                        return {
+                            ...scenario,
+                            analysis: updatedAnalysis
+                        };
+                    }
+                    // Return the unchanged scenario if the index doesn't match
+                    return scenario;
                 });
-                updatedScenarios[index].analysis = prevAnalysis;
                 return updatedScenarios;
-      
-            }
-
-
-               
-            );
+            });
         };
+        
         const deleteAnalysis = (scenarioIndex: number, analysisIndex: number) => {
             setScenarios(prev => {
                 const updatedScenarios = [...prev];
@@ -171,60 +196,132 @@ const fakeScenario: Scenario = {
             recalculateEverything()
         }
     
-
         const addKLMAction = (
             scenarioIndex: number,
             analysisIndex: number,
             taskIndex: number
-          ) => {
-            setScenarios((prev) => {
-              const updatedScenarios = [...prev];
-          
-              // Access the specific scenario, analysis, and task
-              const scenario = updatedScenarios[scenarioIndex];
-              const analysisItem = scenario.analysis[analysisIndex];
-              const task = analysisItem.detailledTask[taskIndex];
-          
-              // Define a new KLM action with default values
-              const newKLMAction: KLM = {
-                operator: "K", // Default operator, can be changed later
-                time: 0.2,
-                count:1,     // Default time, adjust as needed
-              };
-          
-              // Add the new KLM action to the task's KLM actions
-              task.klm = [...task.klm, newKLMAction];
-          
-              // Recalculate task time by summing up all KLM actions' times
-              task.taskTime = task.klm.reduce((total, klm) => total + (klm.time || 0), 0);
-          
-              // Return the updated scenarios array to update the state
-              return updatedScenarios;
+        ) => {
+            setScenarios(prev => {
+                // Create a new array for scenarios
+                const updatedScenarios = prev.map((scenario, sIndex) => {
+                    if (sIndex === scenarioIndex) {
+                        // Create a new array for analysis
+                        const updatedAnalysis = scenario.analysis.map((analysis, aIndex) => {
+                            if (aIndex === analysisIndex) {
+                                // Create a new array for tasks
+                                const updatedDetailledTask = analysis.detailledTask.map((task, tIndex) => {
+                                    if (tIndex === taskIndex) {
+                                        // Define a new KLM action with default values
+                                        const newKLMAction: KLM = {
+                                            operator: "K",
+                                            time: 0.2,
+                                            count: 1,
+                                        };
+        
+                                        // Create a new array for KLM actions with the new KLM action added
+                                        const updatedKLM = [...task.klm, newKLMAction];
+        
+                                        // Recalculate task time
+                                        const updatedTaskTime = updatedKLM.reduce((total, klm) => total + (klm.time || 0), 0);
+        
+                                        // Return the updated task
+                                        return {
+                                            ...task,
+                                            klm: updatedKLM,
+                                            taskTime: updatedTaskTime,
+                                        };
+                                    }
+                                    // Return the unchanged task if the index doesn't match
+                                    return task;
+                                });
+        
+                                // Return the updated analysis item
+                                return {
+                                    ...analysis,
+                                    detailledTask: updatedDetailledTask,
+                                };
+                            }
+                            // Return the unchanged analysis if the index doesn't match
+                            return analysis;
+                        });
+        
+                        // Return the updated scenario
+                        return {
+                            ...scenario,
+                            analysis: updatedAnalysis,
+                        };
+                    }
+                    // Return the unchanged scenario if the index doesn't match
+                    return scenario;
+                });
+        
+                // Return the updated scenarios array
+                return updatedScenarios;
             });
-            recalculateEverything()
-
-          };
-          const deleteKLMAction = ( scenarioIndex: number, analysisIndex: number, taskIndex: number, klmIndex: number) => {
-            setScenarios((prev) => {
-              const updatedScenarios = [...prev];
-          
-              // Access the specific scenario, analysis, and task
-              const scenario = updatedScenarios[scenarioIndex];
-              const analysisItem = scenario.analysis[analysisIndex];
-              const task = analysisItem.detailledTask[taskIndex];
-          
-              // Remove the KLM action at the specified index
-              task.klm.splice(klmIndex, 1);
-          
-              // Recalculate task time by summing up all KLM actions' times
-              task.taskTime = task.klm.reduce((total, klm) => total + (klm.time || 0), 0);
-          
-              // Return the updated scenarios array to update the state
-              return updatedScenarios;
+        
+            recalculateEverything();
+        };
+        
+        const deleteKLMAction = (
+            scenarioIndex: number,
+            analysisIndex: number,
+            taskIndex: number,
+            klmIndex: number
+        ) => {
+            setScenarios(prev => {
+                // Create a new array for scenarios
+                const updatedScenarios = prev.map((scenario, sIndex) => {
+                    if (sIndex === scenarioIndex) {
+                        // Create a new array for analysis
+                        const updatedAnalysis = scenario.analysis.map((analysis, aIndex) => {
+                            if (aIndex === analysisIndex) {
+                                // Create a new array for tasks
+                                const updatedDetailledTask = analysis.detailledTask.map((task, tIndex) => {
+                                    if (tIndex === taskIndex) {
+                                        // Create a new array for KLM actions with the specified KLM action removed
+                                        const updatedKLM = task.klm.filter((_, index) => index !== klmIndex);
+        
+                                        // Recalculate task time
+                                        const updatedTaskTime = updatedKLM.reduce((total, klm) => total + (klm.time || 0), 0);
+        
+                                        // Return the updated task
+                                        return {
+                                            ...task,
+                                            klm: updatedKLM,
+                                            taskTime: updatedTaskTime,
+                                        };
+                                    }
+                                    // Return the unchanged task if the index doesn't match
+                                    return task;
+                                });
+        
+                                // Return the updated analysis item
+                                return {
+                                    ...analysis,
+                                    detailledTask: updatedDetailledTask,
+                                };
+                            }
+                            // Return the unchanged analysis if the index doesn't match
+                            return analysis;
+                        });
+        
+                        // Return the updated scenario
+                        return {
+                            ...scenario,
+                            analysis: updatedAnalysis,
+                        };
+                    }
+                    // Return the unchanged scenario if the index doesn't match
+                    return scenario;
+                });
+        
+                // Return the updated scenarios array
+                return updatedScenarios;
             });
-            recalculateEverything()
-
-          }
+        
+            recalculateEverything();
+        };
+        
     const updateKLM = (
         scenarioIndex: number,
         analysisIndex: number,
@@ -232,6 +329,7 @@ const fakeScenario: Scenario = {
         klmIndex: number,
         updatedKLM: KLM
       ) => {
+
         setScenarios((prevScenarios) => {
           // Create a deep copy of the previous scenarios
           const updatedScenarios = [...prevScenarios];
@@ -259,15 +357,37 @@ const fakeScenario: Scenario = {
     // Edit user action
     const editUserAction = (scenarioIndex: number, userActionIndex: number, updatedUserAction: string) => {
         setScenarios(prev => {
-            const updatedScenarios = [...prev];
-            updatedScenarios[scenarioIndex].analysis[userActionIndex].userAction = updatedUserAction;
-            return updatedScenarios;
-        }); 
+            // Deep copy the scenarios array
+            const updatedScenarios = prev.map((scenario, sIndex) => {
+                if (sIndex === scenarioIndex) {
+                    // Deep copy the analysis array of the specific scenario
+                    const updatedAnalysis = scenario.analysis.map((analysis, aIndex) => {
+                        if (aIndex === userActionIndex) {
+                            // Create a new object for the updated analysis
+                            return {
+                                ...analysis,
+                                userAction: updatedUserAction
+                            };
+                        }
+                        return analysis; // Return the original analysis if not being updated
+                    });
+                    // Return a new scenario object with the updated analysis array
+                    return {
+                        ...scenario,
+                        analysis: updatedAnalysis
+                    };
+                }
+                return scenario; // Return the original scenario if not being updated
+            });
+            return updatedScenarios; // Return the updated scenarios array
+        });
     };
+    
     
 
 
     const handleTaskDescriptionChange = (scenarioIndex: number, analysisIndex: number, taskIndex: number, newDescription: string) => {
+        
         const updatedScenarios = [...scenarios];    
         updatedScenarios[scenarioIndex].analysis[analysisIndex].detailledTask[taskIndex].description = newDescription;
         setScenarios(updatedScenarios);
@@ -296,7 +416,12 @@ const fakeScenario: Scenario = {
                             if (klm.operator === "D") {
                                 // For "D" operator, calculate time based on `n` and `l` values
                                 calculatedTime = (klm.n || 1) * (klmValue.n || 0.9) + (klm.l || 1) * (klmValue.l || 0.16);
-                            } else {
+                            } 
+                            else if (klm.operator === "R") {
+                                // For "R" operator, use the predefined value
+                                calculatedTime = klm.r || 0;
+                            }
+                            else {
                                 // For other operators, use the predefined value
                                 calculatedTime = (klm.count || 0) * (klmValue.value || 0);
 
@@ -346,11 +471,9 @@ const calculateAnalysisTime = () => {
 const calculateScenarioTime = () => {
     setScenarios(prevScenarios => {
         return prevScenarios.map(scenario => {
-            // Calculate total time
             const totalTime = scenario.analysis.reduce((total, analysisItem) => 
                 total + (analysisItem.averageTime || 0), 0);
             
-            // Return the updated scenario with formatted time
             return {
                 ...scenario,
                 time: Math.round(totalTime * 100) / 100 // Format total time to 2 decimal places
@@ -360,12 +483,9 @@ const calculateScenarioTime = () => {
 };
 
                     useEffect(() => {
-            if (dt.current) {
-                dt.current.reset();
-            }
-            recalculateEverything()
 
-        }, []);
+                        console.log("scenarios", scenarios);
+        }, [scenarios]);
         return [scenarios, handleNewScenario, addAnalysis, 
             dt, addKLMAction,editScenarioDescription, editUserAction, updateKLM,
              addTask, handleTaskDescriptionChange, deleteScenario,deleteAnalysis,deleteTask, deleteKLMAction  ] as const;
