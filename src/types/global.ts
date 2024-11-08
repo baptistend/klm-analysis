@@ -29,6 +29,18 @@ export const KLMvalues = [
         n: 0.9, 
         l: 0.16, 
         description: "Glissement (basé sur le temps de glissement typique)" // Dragging (based on typical dragging time)
+    },
+    {
+        label: "Tap",
+        value: 0.08,
+
+        description: "Tap pour smartphone" // Dragging (based on typical dragging time)
+    },
+    {
+        label: "Swipe",
+        value: 0.07,
+
+        description: "Swipe pour smartphone" // Dragging (based on typical dragging time)
     }
 ];
 
